@@ -29,6 +29,9 @@ class LinkedList {
 }
 
 /**
+ * Swap Nodes in Pairs
+ * https://leetcode.com/problems/swap-nodes-in-pairs/
+ *
  * Given a linked list, swap every two adjacent nodes and return its head.
  * e.g.  for a list 1-> 2 -> 3 -> 4, one should return the head of list as 2 -> 1 -> 4 -> 3.
  * 
@@ -46,9 +49,10 @@ function swapPairs(head) {
     return head;
   }
   
+  const first = head;
+  const second = head.next;
   const tail = head.next.next;
-  head.next.next = head;
-  const next = head.next;
-  head.next = swapPairs(tail);
-  return next;
+  second.next = first;
+  first.next = swapPairs(tail);
+  return second;
 }

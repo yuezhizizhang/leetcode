@@ -1,5 +1,6 @@
 /**
  * Print a string in reverse order.
+ *
  * @param {string} str
  * @return {string} str in the reverse order
  */
@@ -14,6 +15,7 @@ function printReverse( str ) {
 
 /**
  * Print a string in reverse order recusively.
+ *
  * @param {string} str
  * @return {string} str in the reverse order
  */
