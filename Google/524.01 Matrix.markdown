@@ -1,0 +1,164 @@
+## 01 Matrix
+https://leetcode.com/explore/challenge/card/july-leetcoding-challenge-2021/612/week-5-july-29th-july-31st/3831/
+
+> Given an m x n binary matrix mat, return the distance of the nearest 0 for each cell.
+> The distance between two adjacent cells is 1.
+>
+> Example 1:
+>   Input: mat = [[0,0,0],[0,1,0],[0,0,0]]
+>   Output: [[0,0,0],[0,1,0],[0,0,0]]
+>
+> Example 2:
+>   Input: mat = [[0,0,0],[0,1,0],[1,1,1]]
+>   Output: [[0,0,0],[0,1,0],[1,2,1]]
+>
+> Constraints:
+> * m == mat.length
+> * n == mat[i].length
+> * 1 <= m, n <= 104
+> * 1 <= m * n <= 104
+> * mat[i][j] is either 0 or 1.
+> * There is at least one 0 in mat.
+
+**Solution:**
+
+mat is a 2-dimensional array. m is the number of rows. n is the number of columns.
+
+If m(i, j) is 0, then we know d(i, j) is 0. And also, the distance of adjacent cells are maximum 1. The adjacent cells are m(i - 1, j), m(i, j - 1), m(i, j + 1) and m(i + 1, j + 1). 
+
+Our solution is:
+1. Iterate through the array, find all of the 0, mark their result to be 0 and push their positions to a queue.
+2. Iterate through the queue, mark their result to be 1 + d(pre), push their positions to the queue.
+3. Stop until the queue is empty. 
+
+Result:
+Time Complexity: O(n), Space Complexity: O(n)
+
+```C#
+public class Solution {
+	/**
+	 * Note:
+     * Instead of pushing a tuple into queue, use 2 queues, one for the row position, one for the column position,
+     * it could be even faster.
+     */
+    public int[][] UpdateMatrix(int[][] mat)
+    {
+        var visitedCells = new Queue<(int, int)>();
+
+        for (int i = 0; i < mat.Length; i++)
+        {
+            for (int j = 0; j < mat[i].Length; j++)
+            {
+                if (mat[i][j] == 0)
+                {
+                    visitedCells.Enqueue((i, j));
+                }
+                else
+                {
+                    mat[i][j] = int.MaxValue;
+                }
+            }
+        }
+
+        while (visitedCells.Count > 0)
+        {
+            var (row, column) = visitedCells.Dequeue();
+            var value = mat[row][column] + 1;
+
+            // top cell
+            if (row - 1 >= 0 && mat[row - 1][column] > value)
+            {
+                mat[row - 1][column] = value;
+                visitedCells.Enqueue((row - 1, column));
+            }
+
+            // bottom cell
+            if (row + 1 < mat.Length && mat[row + 1][column] > value)
+            {
+                mat[row + 1][column] = value;
+                visitedCells.Enqueue((row + 1, column));
+            }
+
+            // left cell
+            if (column - 1 >= 0 && mat[row][column - 1] > value)
+            {
+                mat[row][column - 1] = value;
+                visitedCells.Enqueue((row, column - 1));
+            }
+
+            // rigth cell
+            if (column + 1 < mat[row].Length && mat[row][column + 1] > value)
+            {
+                mat[row][column + 1] = value;
+                visitedCells.Enqueue((row, column + 1));
+            }
+        }
+
+        return mat;
+    }
+}
+```
+
+```Javascript
+/**
+ * @param {number[][]} mat
+ * @return {number[][]}
+ */
+var updateMatrix = function(mat) {
+    let visitedCells = [];
+    let visited = 0;
+    let total = 0;
+
+    for (let i = 0; i < mat.length; i++) {
+    	for (let j = 0; j < mat[i].length; j++) {
+    		total++;
+
+    		if (mat[i][j] === 0) {
+    			visitedCells.push([i, j]);
+    			visited++;
+    		} else {
+    			mat[i][j] = Number.MAX_VALUE;
+    		}
+    	}
+    }
+
+    while (visited < total && visitedCells.length > 0) {
+    	let cells = [];
+    	for (let [row, column] of visitedCells) {
+    		const value = mat[row][column] + 1;
+
+    		// top cell
+    		if (row - 1 >= 0 && mat[row - 1][column] > value) {
+    			mat[row - 1][column] = value;
+    			cells.push([row - 1, column]);
+    			visited++;
+    		}
+
+    		// bottom cell
+    		if (row + 1 < mat.length && mat[row + 1][column] > value) {
+    			mat[row + 1][column] = value;
+    			cells.push([row + 1, column]);
+    			visited++;
+    		}
+
+    		// left cell
+    		if (column - 1 >= 0 && mat[row][column - 1] > value) {
+    			mat[row][column - 1] = value;
+    			cells.push([row, column - 1]);
+    			visited++;
+    		}
+
+    		// right cell
+    		if (column + 1 < mat[row].length && mat[row][column + 1] > value) {
+    			mat[row][column + 1] = value;
+    			cells.push([row, column + 1]);
+    			visited++;
+    		}
+    	}
+
+    	visitedCells = cells;
+    }
+
+    return mat;
+};
+```
