@@ -1,0 +1,139 @@
+## 15. 3Sum
+https://leetcode.com/problems/3sum/
+
+> Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+> Notice that the solution set must not contain duplicate triplets.
+>
+> Example 1:
+>   Input: nums = [-1,0,1,2,-1,-4]
+>   Output: [[-1,-1,2],[-1,0,1]]
+>
+> Example 2:
+>   Input: nums = []
+>   Output: []
+>
+> Example 3:
+>   Input: nums = [0]
+>   Output: []
+>
+> Constraints:
+>   0 <= nums.length <= 3000
+>   -105 <= nums[i] <= 105
+
+** Solution **
+
+Time Complexity: O(n2), Space Complexity: O(1)
+
+```C#
+public class Solution {
+    public IList<IList<int>> ThreeSum(int[] nums)
+    {
+        var result = new List<IList<int>>();
+        if (nums == null || nums.Length < 3)
+        {
+            return result;
+        }
+
+        Array.Sort(nums);
+
+        for (var i = 0; i < nums.Length; i++)
+        {
+            if (i > 0 && nums[i] == nums[i - 1])
+            {
+                continue;
+            }
+
+            TwoSum(nums, i + 1, -nums[i], result);
+        }
+
+        return result;
+    }
+
+    private void TwoSum(int[] nums, int start, int target, IList<IList<int>> result)
+    {
+        var left = start;
+        var right = nums.Length - 1;
+
+        while (left < right)
+        {
+            var curSum = nums[left] + nums[right];
+            if (curSum == target)
+            {
+                result.Add(new List<int> { -target, nums[left++], nums[right--] });
+
+                while (left < right && nums[left] == nums[left - 1])
+                {
+                    left++;
+                }
+
+                while (left < right && nums[right] == nums[right + 1])
+                {
+                    right--;
+                }
+            }
+            else if (curSum < target)
+            {
+                left++;
+            }
+            else
+            {
+                right--;
+            }
+        }
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {number[]} nums
+ * @return {number[][]}
+ */
+var threeSum = function(nums) {
+    if (!nums || nums.length < 3) {
+    	return [];
+    }
+    
+    nums.sort((a, b) => a - b);
+
+    let result = [];
+    for (let i = 0; i < nums.length; i++) {
+    	if (i > 0 && nums[i] == nums[i - 1]) {
+    		continue;
+    	}
+
+    	let triples = twoSum(nums, i + 1, -nums[i]);
+    	result = [...result, ...triples];
+    }
+
+    return result;
+};
+
+var twoSum = function(nums, start, target) {
+	let result = [];
+
+	let left = start;
+	let right = nums.length - 1;
+	while (left < right)
+	{
+		let sum = nums[left] + nums[right];
+		if (sum === target) {
+			result.push([-target, nums[left++], nums[right--]]);
+
+			while (left < right && nums[left] === nums[left - 1]) {
+				left++;
+			}
+
+			while (left < right && nums[right] === nums[right + 1]) {
+				right--;
+			}
+		} else if (sum < target) {
+			left++;
+		} else {
+			right--;
+		}
+	}
+    
+    return result;
+}
+```
