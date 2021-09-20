@@ -1,0 +1,209 @@
+## 809. Expressive Words
+https://leetcode.com/problems/expressive-words/
+
+> Sometimes people repeat letters to represent extra feeling. For example:
+>   "hello" -> "heeellooo"
+>   "hi" -> "hiiii"
+> In these strings like "heeellooo", we have groups of adjacent letters that are all the same: "h", "eee", "ll", "ooo".
+> You are given a string s and an array of query strings words. A query word is stretchy if it can be made to be equal to s by any number of applications of the following extension operation: choose a group consisting of characters c, and add some number of characters c to the group so that the size of the group is three or more.
+>
+> For example, starting with "hello", we could do an extension on the group "o" to get "hellooo", but we cannot get "helloo" since the group "oo" has a size less than three. Also, we could do another extension like "ll" -> "lllll" to get "helllllooo". If s = "helllllooo", then the query word "hello" would be stretchy because of these two extension operations: query = "hello" -> "hellooo" -> "helllllooo" = s.
+> Return the number of query strings that are stretchy.
+>
+> Example 1:
+>   Input: s = "heeellooo", words = ["hello", "hi", "helo"]
+>   Output: 1
+>   Explanation: 
+>   We can extend "e" and "o" in the word "hello" to get "heeellooo".
+>   We can't extend "helo" to get "heeellooo" because the group "ll" is not size 3 or more.
+>
+> Example 2:
+>   Input: s = "zzzzzyyyyy", words = ["zzyy","zy","zyy"]
+>   Output: 3
+>
+> Constraints:
+> * 1 <= s.length, words.length <= 100
+> * 1 <= words[i].length <= 100
+> * s and words[i] consist of lowercase letters.
+
+** Solution **
+
+```C#
+public class Solution {
+    public int ExpressiveWords(string s, string[] words)
+    {
+        var counter = new List<KeyValuePair<char, int>>();
+        Group(s, counter);
+
+        var total = 0;
+        foreach (var word in words)
+        {
+            if (word.Length < counter.Count || word.Length > s.Length) continue;
+
+            if (IsStrechy(word, counter)) total++;
+        }
+
+        return total;
+    }
+
+    private void Group(string s, IList<KeyValuePair<char, int>> counter)
+    {
+        var start = 0;
+        for (var i = 1; i < s.Length; i++)
+        {
+            if (s[i] == s[start]) continue;
+
+            var count = i - start;
+            if (count == 2)
+            {
+                counter.Add(new KeyValuePair<char, int>(s[start], 1));
+                counter.Add(new KeyValuePair<char, int>(s[start], 1));
+            }
+            else
+            {
+                counter.Add(new KeyValuePair<char, int>(s[start], count));
+            }
+
+            start = i;
+        }
+
+        if (start < s.Length)
+        {
+            var count = s.Length - start;
+            if (count == 2)
+            {
+                counter.Add(new KeyValuePair<char, int>(s[start], 1));
+                counter.Add(new KeyValuePair<char, int>(s[start], 1));
+            }
+            else
+            {
+                counter.Add(new KeyValuePair<char, int>(s[start], count));
+            }
+        }
+    }
+
+    private bool IsStrechy(string word, IList<KeyValuePair<char, int>> counter)
+    {
+        var pos = 0;
+        var i = 0;
+        while (i < word.Length && pos < counter.Count)
+        {
+            var (ch, cnt) = counter[pos];
+
+            if (word[i] != ch)
+            {
+                return false;
+            }
+
+            if (cnt > 1)
+            {
+                var left = i;
+                while (++i < word.Length && word[i] == word[left]) { }
+
+                if (i - left > cnt)
+                {
+                    return false;
+                }
+
+                pos++;
+            }
+            else
+            {
+                i++;
+                pos++;
+            }
+        }
+
+        return i >= word.Length;
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {string} s
+ * @param {string[]} words
+ * @return {number}
+ */
+var expressiveWords = function(s, words) {
+    if (!s || !words || words.length < 1) return 0;
+
+    let counter = [];
+    let str = group(s, counter);
+
+    let total = 0;
+    for (let word of words) {
+        if (word.length < str.length || word.length > s.length) continue;
+
+        if (word === str) {
+            total++;
+            continue;
+        }
+
+        if (isStretchy(word, counter)) total++;
+    }
+
+    return total;
+};
+
+var group = function(s, counter) {
+    let str = '';
+
+    let start = 0;
+    for (let i = 1; i < s.length; i++) {
+        if (s[i] === s[start]) continue;
+
+        let cnt = i - start;
+        if (cnt === 2) {
+            str += s[start];
+            counter.push({ key: s[start], value: 1 });
+            str += s[start];
+            counter.push({ key: s[start], value: 1 });
+        } else {
+            str += s[start];
+            counter.push({ key: s[start], value: cnt });
+        }
+
+        start = i;
+    }
+
+    if (start < s.length) {
+        let cnt = s.length - start;
+        if (cnt === 2) {
+            str += s[start];
+            counter.push({ key: s[start], value: 1 });
+            str += s[start];
+            counter.push({ key: s[start], value: 1 });
+        } else {
+            str += s[start];
+            counter.push({ key: s[start], value: cnt });
+        }
+    }
+
+    return str;
+};
+
+var isStretchy = function(word, counter) {
+    let j = 0;
+    let i = 0;
+    while (i < word.length && j < counter.length) {
+        if (word[i] !== counter[j].key) return false;
+
+        let occurs = counter[j].value;
+        if (occurs > 1) {
+            let start = i;
+            while(++i < word.length && word[i] === word[start]) {}
+
+            let cnt = i - start;
+            if (cnt > occurs) return false;
+
+            j++;
+        } else {
+            i++;
+            j++;
+        }
+    }
+
+    return i >= word.length;
+};
+```

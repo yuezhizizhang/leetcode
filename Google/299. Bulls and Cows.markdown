@@ -1,0 +1,122 @@
+## 299. Bulls and Cows
+https://leetcode.com/problems/bulls-and-cows/
+
+You are playing the Bulls and Cows game with your friend.
+
+You write down a secret number and ask your friend to guess what the number is. When your friend makes a guess, you provide a hint with the following info:
+
+The number of "bulls", which are digits in the guess that are in the correct position.
+The number of "cows", which are digits in the guess that are in your secret number but are located in the wrong position. Specifically, the non-bull digits in the guess that could be rearranged such that they become bulls.
+Given the secret number secret and your friend's guess guess, return the hint for your friend's guess.
+
+The hint should be formatted as "xAyB", where x is the number of bulls and y is the number of cows. Note that both secret and guess may contain duplicate digits.
+
+Example 1:
+  Input: secret = "1807", guess = "7810"
+  Output: "1A3B"
+  Explanation: Bulls are connected with a '|' and cows are underlined:
+  "1807"
+    |
+  "7810"
+
+Example 2:
+  Input: secret = "1123", guess = "0111"
+  Output: "1A1B"
+  Explanation: Bulls are connected with a '|' and cows are underlined:
+  "1123"        "1123"
+    |      or     |
+  "0111"        "0111"
+  Note that only one of the two unmatched 1s is counted as a cow since the non-bull digits can only be rearranged to allow one 1 to be a bull.
+
+Example 3:
+  Input: secret = "1", guess = "0"
+  Output: "0A0B"
+
+Example 4:
+  Input: secret = "1", guess = "1"
+  Output: "1A0B"
+
+Constraints:
+* 1 <= secret.length, guess.length <= 1000
+* secret.length == guess.length
+* secret and guess consist of digits only.
+
+```JavaScript
+public class Solution {
+    public string GetHint(string secret, string guess) {
+        if (secret.Length != guess.Length)
+        {
+            throw new ArgumentException();
+        }
+
+        const int size = 10;
+        var bulls = 0;
+        var cows = 0;
+        var scount = new int[size];
+        var gcount = new int[size];
+        var keys = new HashSet<int>();
+
+        for (var i = 0; i < secret.Length; i++)
+        {
+            if (secret[i] == guess[i])
+            {
+                bulls++;
+            }
+            else
+            {
+                var index = secret[i] - '0';
+                scount[index]++;
+                keys.Add(index);
+                index = guess[i] - '0';
+                gcount[index]++;
+            }
+        }
+
+        foreach (var key in keys)
+        {
+            cows += Math.Min(scount[key], gcount[key]);
+        }
+
+        return $"{bulls}A{cows}B";
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {string} secret
+ * @param {string} guess
+ * @return {string}
+ */
+var getHint = function(secret, guess) {
+    if (secret.length !== guess.length) return null;
+
+	const size = 10;
+	let bulls = 0;
+	let cows = 0;
+	let scount = new Map();
+	let gcount = new Map();
+
+	for (let i = 0; i < secret.length; i++) {
+		if (secret[i] === guess[i]) {
+			bulls++;
+		} else {
+			let index = secret[i] - '0';
+			if (scount.has(index)) scount.set(index, scount.get(index) + 1);
+			else scount.set(index, 1);
+
+			index = guess[i] - '0';
+			if (gcount.has(index)) gcount.set(index, gcount.get(index) + 1);
+			else gcount.set(index, 1);
+		}
+	}
+
+	for (const [key, value] of scount) {
+		if (gcount.has(key)) {
+			cows += Math.min(value, gcount.get(key));
+		}
+	}
+
+	return `${bulls}A${cows}B`;
+};
+```

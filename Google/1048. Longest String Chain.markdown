@@ -1,0 +1,149 @@
+## 1048. Longest String Chain
+https://leetcode.com/problems/longest-string-chain/
+
+You are given an array of words where each word consists of lowercase English letters.
+
+wordA is a predecessor of wordB if and only if we can insert exactly one letter anywhere in wordA without changing the order of the other characters to make it equal to wordB.
+
+For example, "abc" is a predecessor of "abac", while "cba" is not a predecessor of "bcad".
+A word chain is a sequence of words [word1, word2, ..., wordk] with k >= 1, where word1 is a predecessor of word2, word2 is a predecessor of word3, and so on. A single word is trivially a word chain with k == 1.
+
+Return the length of the longest possible word chain with words chosen from the given list of words.
+
+Example 1:
+  Input: words = ["a","b","ba","bca","bda","bdca"]
+  Output: 4
+  Explanation: One of the longest word chains is ["a","ba","bda","bdca"].
+
+Example 2:
+  Input: words = ["xbc","pcxbcf","xb","cxbc","pcxbc"]
+  Output: 5
+  Explanation: All the words can be put in a word chain ["xb", "xbc", "cxbc", "pcxbc", "pcxbcf"].
+
+Example 3:
+  Input: words = ["abcd","dbqca"]
+  Output: 1
+  Explanation: The trivial word chain ["abcd"] is one of the longest word chains.
+  ["abcd","dbqca"] is not a valid word chain because the ordering of the letters is changed.
+
+Constraints:
+* 1 <= words.length <= 1000
+* 1 <= words[i].length <= 16
+* words[i] only consists of lowercase English letters.
+
+```C#
+public class Solution {
+    public int LongestStrChain(string[] words)
+    {
+        Array.Sort(words, (x, y) => x.Length.CompareTo(y.Length));
+
+        var count = new int[words.Length];
+        var max = 0;
+        for (var i = 0; i < words.Length; i++)
+        {
+            max = Math.Max(max, Longest(words, count, i));
+        }
+
+        return max;
+    }
+
+    private int Longest(string[] words, int[] count, int start)
+    {
+        if (count[start] > 0) return count[start];
+
+        var predecessor = words[start];
+        var max = 1;
+
+        for (var i = start + 1; i < words.Length; i++)
+        {
+            if (words[i].Length == predecessor.Length) continue;
+
+            if (isPredecessor(predecessor, words[i]))
+            {
+                max = Math.Max(max, 1 + Longest(words, count, i));
+            }
+        }
+
+        count[start] = max;
+        return max;
+    }
+
+    private bool isPredecessor(string predecessor, string word)
+    {
+        if (word.Length != predecessor.Length + 1) return false;
+
+        var i = 0;
+        var j = 0;
+        var oneMismatch = false;
+        while (i < predecessor.Length && j < word.Length)
+        {
+            if (predecessor[i] != word[j])
+            {
+                if (oneMismatch) return false;
+                else j++;
+            }
+            else
+            {
+                i++;
+                j++;
+            }
+        }
+
+        return i == predecessor.Length;
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {string[]} words
+ * @return {number}
+ */
+var longestStrChain = function(words) {
+    words.sort((a, b) => a.length - b.length);
+
+    let count = new Array(words.length).fill(0);
+    let max = 0;
+    for (let i = 0; i < words.length; i++) {
+      max = Math.max(max, longest(words, count, i));
+    }
+
+    return max;
+};
+
+var longest = function(words, count, start) {
+  if (count[start] > 0) return count[start];
+
+  let predecessor = words[start];
+  let max = 1;
+  for (let i = start + 1; i < words.length; i++) {
+    if (isPrecedessor(predecessor, words[i])) {
+      max = Math.max(max, 1 + longest(words, count, i));
+    }
+  }
+
+  count[start] = max;
+  return max;
+};
+
+var isPrecedessor = function(predecessor, word) {
+  if (predecessor.length + 1 !== word.length) return false;
+
+  let i = 0, j = 0;
+  let oneMismatch = false;
+  while (i < predecessor.length && j < word.length) {
+    if (predecessor[i] !== word[j]) {
+      if (oneMismatch) return false;
+      else {
+        oneMismatch = true;
+        j++;
+      }
+    } else {
+      i++;
+      j++;
+    }
+  }
+
+  return i === predecessor.length;
+};
+```

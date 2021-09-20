@@ -1,0 +1,118 @@
+## 1170. Compare Strings by Frequency of the Smallest Character
+https://leetcode.com/problems/compare-strings-by-frequency-of-the-smallest-character/
+
+Let the function f(s) be the frequency of the lexicographically smallest character in a non-empty string s. For example, if s = "dcce" then f(s) = 2 because the lexicographically smallest character is 'c', which has a frequency of 2.
+
+You are given an array of strings words and another array of query strings queries. For each query queries[i], count the number of words in words such that f(queries[i]) < f(W) for each W in words.
+
+Return an integer array answer, where each answer[i] is the answer to the ith query.
+
+Example 1:
+  Input: queries = ["cbd"], words = ["zaaaz"]
+  Output: [1]
+  Explanation: On the first query we have f("cbd") = 1, f("zaaaz") = 3 so f("cbd") < f("zaaaz").
+
+Example 2:
+  Input: queries = ["bbb","cc"], words = ["a","aa","aaa","aaaa"]
+  Output: [1,2]
+  Explanation: On the first query only f("bbb") < f("aaaa"). On the second query both f("aaa") and f("aaaa") are both > f("cc").
+
+Constraints:
+* 1 <= queries.length <= 2000
+* 1 <= words.length <= 2000
+* 1 <= queries[i].length, words[i].length <= 10
+* queries[i][j], words[i][j] consist of lowercase English letters.
+
+** Solution **
+
+1 <= queries[i].length, words[i].length <= 10 is a key criteria.
+
+```C#
+public class Solution {
+    private const int MaxLength = 10;
+
+    public int[] NumSmallerByFrequency(string[] queries, string[] words)
+    {
+        var freqs = new int[MaxLength + 1];
+        foreach (var word in words)
+        {
+            ++freqs[CalcFrequency(word)];
+        }
+
+        for (var i = freqs.Length - 2; i > 0; i--)
+        {
+            freqs[i] += freqs[i + 1];
+        }
+
+        var result = new int[queries.Length];
+        for (var i = 0; i < queries.Length; i++)
+        {
+            var count = CalcFrequency(queries[i]);
+            result[i] = count >= MaxLength ? 0 : freqs[count + 1];
+        }
+
+        return result;
+    }
+
+    private int CalcFrequency(string word)
+    {
+        char min = word.Min();
+        return word.Count(c => c == min);
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {string[]} queries
+ * @param {string[]} words
+ * @return {number[]}
+ */
+/**
+ * @param {string[]} queries
+ * @param {string[]} words
+ * @return {number[]}
+ */
+var numSmallerByFrequency = function(queries, words) {
+  const maxLength = 10;
+
+  let freqs = new Array(maxLength + 1).fill(0);
+  for (const word of words) {
+    ++freqs[calcFrequency(word)];
+  }
+
+  for (let i = maxLength - 1; i > 0; i--) {
+    freqs[i] += freqs[i + 1];
+  }
+
+  let result = [];
+  for (const query of queries) {
+    let count = calcFrequency(query);
+
+    if (count >= maxLength) {
+      result.push(0);
+    } else {
+      result.push(freqs[count + 1]);
+    }
+  }
+
+  return result;
+};
+
+var calcFrequency = function(word) {
+  if (!word) return 0;
+
+  let ch = word[0];
+  let count = 1;
+  for (var i = 1; i < word.length; i++) {
+    if (word[i] < ch) {
+      ch = word[i];
+      count = 1;
+    } else if (word[i] === ch) {
+      count++;
+    }
+  }
+
+  return count;
+};
+```
