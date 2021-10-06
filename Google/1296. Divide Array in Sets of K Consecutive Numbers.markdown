@@ -1,0 +1,93 @@
+## 1296. Divide Array in Sets of K Consecutive Numbers
+https://leetcode.com/problems/divide-array-in-sets-of-k-consecutive-numbers/
+
+Given an array of integers nums and a positive integer k, find whether it is possible to divide this array into sets of k consecutive numbers.
+
+Return true if it is possible. Otherwise, return false.
+
+Example 1:
+  Input: nums = [1,2,3,3,4,4,5,6], k = 4
+  Output: true
+Explanation: Array can be divided into [1,2,3,4] and [3,4,5,6].
+
+Example 2:
+  Input: nums = [3,2,1,2,3,4,3,4,5,9,10,11], k = 3
+  Output: true
+Explanation: Array can be divided into [1,2,3] , [2,3,4] , [3,4,5] and [9,10,11].
+
+Example 3:
+  Input: nums = [3,3,2,2,1,1], k = 3
+  Output: true
+
+Example 4:
+  Input: nums = [1,2,3,4], k = 3
+  Output: false
+Explanation: Each array should be divided in subarrays of size 3.
+
+** Solution **
+
+```C#
+public class Solution {
+    public bool IsPossibleDivide(int[] nums, int k) {
+        if (nums == null || nums.Length == 0 || nums.Length % k != 0) return false;
+
+        var counter = new Dictionary<int, int>();
+        foreach(var num in nums)
+        {
+            if (counter.ContainsKey(num)) counter[num]++;
+            else counter.Add(num, 1);
+        }
+
+        var keys = counter.Keys.OrderBy(n => n);
+        foreach (var num in keys)
+        {
+            if (counter[num] <= 0) continue;
+
+            var count = counter[num];
+            for (var i = 1; i < k; i++)
+            {
+                var next = num + i;
+                if (!counter.ContainsKey(next) || counter[next] < count) return false;
+
+                counter[next] -= count;
+            }
+        }
+
+        return true;
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {boolean}
+ */
+var isPossibleDivide = function(nums, k) {
+  let map = new Map();
+
+  for (const num of nums) {
+    if (map.has(num)) {
+      map.set(num, map.get(num) + 1);
+    } else {
+      map.set(num, 1);
+    }
+  }
+
+  let keys = [...map.keys()].sort((a, b) => a - b);
+  for (const num of keys) {
+    if (map.get(num) <= 0) continue;
+
+    const count = map.get(num);
+    for (let i = 1; i < k; i++) {
+      const next = num + i;
+      if (!map.has(next) || map.get(next) < count) return false;
+
+      map.set(next, map.get(next) - count);
+    }
+  }
+
+  return true;
+};
+```

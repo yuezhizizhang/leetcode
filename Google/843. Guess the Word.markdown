@@ -1,0 +1,388 @@
+## 843. Guess the Word
+https://leetcode.com/problems/guess-the-word/
+
+This is an interactive problem.
+
+You are given an array of unique strings wordlist where wordlist[i] is 6 letters long, and one word in this list is chosen as secret.
+
+You may call Master.guess(word) to guess a word. The guessed word should have type string and must be from the original list with 6 lowercase letters.
+
+This function returns an integer type, representing the number of exact matches (value and position) of your guess to the secret word. Also, if your guess is not in the given wordlist, it will return -1 instead.
+
+For each test case, you have exactly 10 guesses to guess the word. At the end of any number of calls, if you have made 10 or fewer calls to Master.guess and at least one of these guesses was secret, then you pass the test case.
+
+Example 1:
+  Input: secret = "acckzz", wordlist = ["acckzz","ccbazz","eiowzz","abcczz"], numguesses = 10
+  Output: You guessed the secret word correctly.
+Explanation:
+  master.guess("aaaaaa") returns -1, because "aaaaaa" is not in wordlist.
+  master.guess("acckzz") returns 6, because "acckzz" is secret and has all 6 matches.
+  master.guess("ccbazz") returns 3, because "ccbazz" has 3 matches.
+  master.guess("eiowzz") returns 2, because "eiowzz" has 2 matches.
+  master.guess("abcczz") returns 4, because "abcczz" has 4 matches.
+  We made 5 calls to master.guess and one of them was the secret, so we pass the test case.
+
+Example 2:
+  Input: secret = "hamada", wordlist = ["hamada","khaled"], numguesses = 10
+  Output: You guessed the secret word correctly.
+
+Constraints:
+* 1 <= wordlist.length <= 100
+* wordlist[i].length == 6
+* wordlist[i] consist of lowercase English letters.
+* All the strings of wordlist are unique.
+* secret exists in wordlist.
+* numguesses == 10
+
+** Solution **
+
+https://www.youtube.com/watch?v=KCWGtEcBN6c&t=878s. 
+
+The main idea is for a 6-chars word, there are 7 possible matching cases, which are 0-match, 1-match, .... and 6-match. By probability, each case filters out 6/7 of the list. If we repeat the process, we will narrow down the word list.
+
+However, this step is not enough. So a scoring method of the most common word is proposed. We will always pick the word of highest score to do the guess. For each position in the word, we count how many times each character appears. We add up the count to get the score value. The word with the highest score value is the most common word.
+
+```C#
+/**
+ * // This is the Master's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * class Master {
+ *     public int Guess(string word);
+ * }
+ */
+class Solution {
+    private const int NumGuesses = 10;
+    private const int WordLength = 6;
+
+    public void FindSecretWord(string[] wordlist, Master master)
+    {
+        if (wordlist == null || wordlist.Length == 0) return;
+
+        var scores = new int[WordLength][];
+        for (var i = 0; i < WordLength; i++)
+        {
+            scores[i] = new int[26];
+            Array.Fill(scores[i], 0);
+        }
+
+        foreach (var word in wordlist)
+        {
+            for (var i = 0; i < WordLength; i++)
+            {
+                var ch = word[i] - 'a';
+                scores[i][ch]++;
+            }
+        }
+
+        var filterList = new List<string>(wordlist);
+        var guessedWords = new HashSet<string>();
+        var rand = new Random();
+        for (var i = 0; i < NumGuesses; i++)
+        {
+            if (filterList.Count == 0) return;
+
+            var word = FindMostCommonWord(filterList, scores);
+            var match = master.guess(word);
+            if (match == 6) return;
+
+            filterList = FilterWords(word, filterList, match);
+        }
+    }
+
+    private string FindMostCommonWord(IList<string> wordlist, int[][] scores)
+    {
+        var score = 0;
+        var word = "";
+        foreach(var wd in wordlist)
+        {
+            var value = ComputeScore(wd, scores);
+            if (value > score)
+            {
+                score = value;
+                word = wd;
+            }
+        }
+
+        return word;
+    }
+
+    private int ComputeScore(string word, int[][] scores)
+    {
+        var sum = 0;
+        for (var i = 0; i < WordLength; i++)
+        {
+            var index = word[i] - 'a';
+            sum += scores[i][index];
+        }
+
+        return sum;
+    }
+
+    private List<string> FilterWords(string word, IList<string> wordlist, int match)
+    {
+        var filterList = new List<string>();
+
+        foreach (var wd in wordlist)
+        {
+            if (CheckWord(word, wd, match)) filterList.Add(wd);
+        }
+
+        return filterList;
+    }
+
+    private bool CheckWord(string w1, string w2, int match)
+    {
+        var count = 0;
+        for (var i = 0; i < WordLength; i++)
+        {
+            if (w1[i] == w2[i]) count++;
+        }
+
+        return count == match;
+    }
+}
+
+class Solution {
+    private const int NumGuesses = 10;
+    private const int WordLength = 6;
+
+    public void FindSecretWord(string[] wordlist, Master master)
+    {
+        if (wordlist == null || wordlist.Length == 0) return;
+
+        var filterList = new List<string>(wordlist);
+        var rand = new Random();
+        for (var i = 0; i < NumGuesses; i++)
+        {
+            var next = rand.Next(filterList.Count);
+            var word = filterList[next];
+
+            var match = master.guess(word);
+            if (match == 6) return;
+
+            filterList = FilterWords(word, filterList, match);
+        }
+    }
+
+    private List<string> FilterWords(string word, IList<string> wordlist, int match)
+    {
+        var filterList = new List<string>();
+
+        foreach (var wd in wordlist)
+        {
+            if (CheckWord(word, wd, match)) filterList.Add(wd);
+        }
+
+        return filterList;
+    }
+
+    private bool CheckWord(string w1, string w2, int match)
+    {
+        var count = 0;
+        for (var i = 0; i < WordLength; i++)
+        {
+            if (w1[i] == w2[i]) count++;
+        }
+
+        return count == match;
+    }
+}
+```
+
+```JavaScript
+/**
+ * // This is the master's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * function Master() {
+ *
+ *     @param {string[]} wordlist
+ *     @param {Master} master
+ *     @return {integer}
+ *     this.guess = function(word) {
+ *         ...
+ *     };
+ * };
+ */
+/**
+ * @param {string[]} wordlist
+ * @param {Master} master
+ * @return {void}
+ */
+var findSecretWord = function(wordlist, master) {
+    const numOfGuesses = 10;
+    const wordLength = 6;
+
+    let scores = [];
+    for (let i = 0; i < wordLength; i++) {
+      let alphabet = new Array(26);
+      scores.push(alphabet.fill(0));
+    }
+
+    const aCharCode = 'a'.charCodeAt(0);
+    for (const word of wordlist) {
+      for (let i = 0; i < wordLength; i++) {
+        let ch = word[i].charCodeAt(0) - aCharCode;
+        scores[i][ch]++;
+      }
+    }
+
+    for (let i = 0; i < numOfGuesses; i++) {
+      if (wordlist.length == 0) return;
+
+      const word = chooseMostCommonWord(wordlist, scores);
+      let match = master.guess(word);
+      if (match === wordLength) return;
+
+      wordlist = filterWords(wordlist, word, match);
+    }
+};
+
+var chooseMostCommonWord = function(wordlist, scores) {
+  let chosen = null;
+  let score = 0;
+
+  for (const word of wordlist) {
+    let value = computeScore(word, scores);
+    if (value > score) {
+      score = value;
+      chosen = word;
+    }
+  }
+
+  return chosen;
+};
+
+var computeScore = function(word, scores) {
+  const wordLength = 6;
+
+  let sum = 0;
+  const aCharCode = 'a'.charCodeAt(0);
+  for (let i = 0; i < wordLength; i++) {
+    const ch = word[i].charCodeAt(0) - aCharCode;
+    sum += scores[i][ch];
+  }
+
+  return sum;
+};
+
+var filterWords = function(wordlist, word, match) {
+  var filterList = [];
+
+  for (const wd of wordlist) {
+    if (wd === word) continue;
+    
+    if (isNMatch(word, wd, match)) filterList.push(wd);
+  }
+
+  return filterList;
+};
+
+var isNMatch = function(w1, w2, n) {
+  const wordLength = 6;
+
+  var match = 0;
+  for (let i = 0; i < wordLength; i++) {
+    if (w1[i] === w2[i]) match++;
+  }
+
+  return match === n;
+};
+```
+
+```JavaScript
+/**
+ * // This is the master's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * function Master() {
+ *
+ *     @param {string[]} wordlist
+ *     @param {Master} master
+ *     @return {integer}
+ *     this.guess = function(word) {
+ *         ...
+ *     };
+ * };
+ */
+/**
+ * @param {string[]} wordlist
+ * @param {Master} master
+ * @return {void}
+ */
+var findSecretWord = function(wordlist, master) {
+    const numOfGuesses = 10;
+    const wordLength = 6;
+
+    let scores = [];
+    for (let i = 0; i < wordLength; i++) {
+      let alphabet = new Array(26);
+      scores.push(alphabet.fill(0));
+    }
+
+    for (const word of wordlist) {
+      for (let i = 0; i < wordLength; i++) {
+        let ch = word[i] - 'a';
+        scores[i][ch]++;
+      }
+    }
+
+    for (let i = 0; i < numOfGuesses; i++) {
+      if (wordlist.length == 0) return;
+
+      const word = chooseMostCommonWord(wordlist, scores);
+      let match = master.guess(word);
+      if (match === wordLength) return;
+
+      wordlist = filterWords(wordlist, word, match);
+    }
+};
+
+var chooseMostCommonWord = function(wordlist, scores) {
+  let chosen = null;
+  let score = 0;
+
+  for (let word of wordlist) {
+    let value = computeScore(word, scores);
+    if (value > score) {
+      score = value;
+      chosen = word;
+    }
+  }
+
+  return chosen;
+};
+
+var computeScore = function(word, scores) {
+  const wordLength = 6;
+
+  let sum = 0;
+  for (let i = 0; i < wordLength; i++) {
+    const ch = word[i] - 'a';
+    sum += scores[i][ch];
+  }
+
+  return sum;
+};
+
+var filterWords = function(wordlist, word, match) {
+  var filterList = [];
+
+  for (let wd of wordlist) {
+    if (wd === word) continue;
+
+    if (isNMatch(word, wd, match)) filterList.push(wd);
+  }
+
+  return filterList;
+};
+
+var isNMatch = function(w1, w2, n) {
+  const wordLength = 6;
+
+  var match = 0;
+  for (let i = 0; i < wordLength; i++) {
+    if (w1[i] === w2[i]) match++;
+  }
+
+  return match === n;
+};
+```
