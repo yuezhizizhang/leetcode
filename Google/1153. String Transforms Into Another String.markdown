@@ -1,0 +1,123 @@
+## 1153. String Transforms Into Another String
+https://leetcode.com/problems/string-transforms-into-another-string/
+
+Given two strings str1 and str2 of the same length, determine whether you can transform str1 into str2 by doing zero or more conversions.
+
+In one conversion you can convert all occurrences of one character in str1 to any other lowercase English character.
+
+Return true if and only if you can transform str1 into str2.
+
+Example 1:
+
+Input: str1 = "aabcc", str2 = "ccdee"
+Output: true
+Explanation: Convert 'c' to 'e' then 'b' to 'd' then 'a' to 'c'. Note that the order of conversions matter.
+Example 2:
+
+Input: str1 = "leetcode", str2 = "codeleet"
+Output: false
+Explanation: There is no way to transform str1 to str2.
+ 
+
+Constraints:
+
+1 <= str1.length == str2.length <= 104
+str1 and str2 contain only lowercase English letters.
+
+** Solution **
+
+https://www.youtube.com/watch?v=WBE1mQHsMI0
+
+There are two special situations to consider about:
+
+1. When there is a swap. For instance: "abc" => "bac". 
+2. When there is a process of cycle. For instance: "abc" => "bca".
+3. When all of the 26 alphabetic characters appear in str1, and there is a swap or a process of cycle change.
+
+Examples:
+
+"abcdefghijklmnopqrstuvwxyz" => 
+"bcdefghijklmnopqrstuvwxyzq"
+Operation: z -> p, y -> z .... p -> q .... a -> b
+
+"abcdefghijklmnopqrstuvwxyz" => 
+"bcdefghijklmnnpqrstuvwxyza"
+Operation: "mlkjihgfedcba" -> "nmlkjihgfedcb", "zyxwvutsrqpo" -> "azyxwvutsrqp"
+
+"abcdefghijklmnopqrstuvwxyz" => "bcdefghijklmnopqrstuvwxyza"
+"abcdefghijklmnopqrstuvwxyz" => "abcdefghijklmnopqrstuvwxzy"
+No Operations.
+
+```C#
+public class Solution {
+    public bool CanConvert(string str1, string str2) {
+        if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2) || str1.Length != str2.Length) return false;
+
+        var map = new Dictionary<char, char>();
+        var changed = 0;
+        var swap = false;
+        var chars = new HashSet<char>();
+        for (var i = 0; i < str1.Length; i++)
+        {
+            var key = str1[i];
+            var value = str2[i];
+
+            if (!map.ContainsKey(key))
+            {
+                map.Add(key, value);
+
+                if (key != value)
+                {
+                    changed++;
+                    if (!swap && map.ContainsKey(value) && map[value] == key) swap = true;
+                }
+            }
+            else if (map[key] != value)
+            {
+                return false;
+            }
+
+            if (!chars.Contains(value)) chars.Add(value);
+        }
+
+        return chars.Count < 26 || (changed < 26 && !swap);
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {string} str1
+ * @param {string} str2
+ * @return {boolean}
+ */
+var canConvert = function(str1, str2) {
+    if (!str1 || !str2 || str1.length != str2.length) return false;
+
+    let map = new Map();
+    let changed = 0;
+    let charsSet = new Set();
+    let swap = false;
+    for (let i = 0; i < str1.length; i++) {
+        const convertFrom = str1[i];
+        const convertTo = str2[i];
+
+        if (!map.has(convertFrom)) {
+            map.set(convertFrom, convertTo);
+            
+            if (!charsSet.has(convertTo)) charsSet.add(convertTo);
+
+            if (convertFrom !== convertTo) {
+                changed++;
+                
+                if (!swap && map.has(convertTo) && map.get(convertTo) === convertFrom)
+                    swap = true;
+            }
+        } else if (map.get(convertFrom) !== convertTo) {
+            return false;
+        }
+    }
+
+    return charsSet.size < 26 || (!swap && changed < 26);
+};
+```
