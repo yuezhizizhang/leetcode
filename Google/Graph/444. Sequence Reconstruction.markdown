@@ -1,0 +1,168 @@
+https://leetcode.com/problems/sequence-reconstruction/
+
+You are given an integer array nums of length n where nums is a permutation of the integers in the range [1, n]. You are also given a 2D integer array sequences where sequences[i] is a subsequence of nums.
+
+Check if nums is the shortest possible and the only supersequence. The shortest supersequence is a sequence with the shortest length and has all sequences[i] as subsequences. There could be multiple valid supersequences for the given array sequences.
+
+For example, for sequences = [[1,2],[1,3]], there are two shortest supersequences, [1,2,3] and [1,3,2].
+While for sequences = [[1,2],[1,3],[1,2,3]], the only shortest supersequence possible is [1,2,3]. [1,2,3,4] is a possible supersequence but not the shortest.
+Return true if nums is the only shortest supersequence for sequences, or false otherwise.
+
+A subsequence is a sequence that can be derived from another sequence by deleting some or no elements without changing the order of the remaining elements.
+
+Example 1:
+Input: nums = [1,2,3], sequences = [[1,2],[1,3]]
+Output: false
+Explanation: There are two possible supersequences: [1,2,3] and [1,3,2].
+The sequence [1,2] is a subsequence of both: [1,2,3] and [1,3,2].
+The sequence [1,3] is a subsequence of both: [1,2,3] and [1,3,2].
+Since nums is not the only shortest supersequence, we return false.
+
+Example 2:
+Input: nums = [1,2,3], sequences = [[1,2]]
+Output: false
+Explanation: The shortest possible supersequence is [1,2].
+The sequence [1,2] is a subsequence of it: [1,2].
+Since nums is not the shortest supersequence, we return false.
+
+Example 3:
+Input: nums = [1,2,3], sequences = [[1,2],[1,3],[2,3]]
+Output: true
+Explanation: The shortest possible supersequence is [1,2,3].
+The sequence [1,2] is a subsequence of it: [1,2,3].
+The sequence [1,3] is a subsequence of it: [1,2,3].
+The sequence [2,3] is a subsequence of it: [1,2,3].
+Since nums is the only shortest supersequence, we return true.
+
+Constraints:
+* n == nums.length
+* 1 <= n <= 104
+* nums is a permutation of all the integers in the range [1, n].
+* 1 <= sequences.length <= 104
+* 1 <= sequences[i].length <= 104
+* 1 <= sum(sequences[i].length) <= 105
+* 1 <= sequences[i][j] <= n
+* All the arrays of sequences are unique.
+* sequences[i] is a subsequence of nums.
+
+```C#
+public class Solution {
+    public bool SequenceReconstruction(int[] nums, IList<IList<int>> sequences)
+    {
+        var size = nums.Length + 1;
+        var graph = new IList<int>[size];
+        var indegrees = new int[size];
+
+        if (GenerateGraph(graph, indegrees, sequences) != nums.Length) return false;
+
+        var topVertices = new Queue<int>();
+        for (var i = 1; i < size; i++)
+        {
+            if (indegrees[i] == 0) topVertices.Enqueue(i);
+        }
+
+        var index = 0;
+        while (topVertices.Count > 0)
+        {
+            if (topVertices.Count > 1) return false;
+
+            var vertice = topVertices.Dequeue();
+            
+            if (nums[index++] != vertice) return false;
+
+            for (var i = 0; i < graph[vertice].Count; i++)
+            {
+                var node = graph[vertice][i];
+                if (--indegrees[node] == 0) topVertices.Enqueue(node);
+            }
+        }
+
+        return index == nums.Length;
+    }
+
+    private int GenerateGraph(IList<int>[] graph, int[] indegrees, IList<IList<int>> sequences)
+    {
+        var numberOfVertices = 0;
+
+        for (var i = 0; i < sequences.Count; i++)
+        {
+            for (var j = 0; j < sequences[i].Count; j++)
+            {
+                var vertice = sequences[i][j];
+
+                if (graph[vertice] == null)
+                {
+                    graph[vertice] = new List<int>();
+                    numberOfVertices++;
+                }
+
+                if (j + 1 < sequences[i].Count)
+                {
+                    graph[vertice].Add(sequences[i][j + 1]);
+                    indegrees[sequences[i][j + 1]]++;
+                }
+            }
+        }
+
+        return numberOfVertices;
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {number[]} nums
+ * @param {number[][]} sequences
+ * @return {boolean}
+ */
+var sequenceReconstruction = function(nums, sequences) {
+    if (nums.length <= 0) return false;
+
+    const size = nums.length + 1;
+    let adjacencyList = new Array(size);
+    let indegrees = new Array(size).fill(0);
+    if (buildGraph(sequences, adjacencyList, indegrees) !== nums.length) return false;
+
+    let queue = [];
+    for (let i = 0; i < indegrees.length; i++) {
+    	if (indegrees[i] === 0) queue.push(i);
+    }
+
+    let index = 0;
+    while (queue.length > 0) {
+    	if (queue.length !== 1) return false;
+
+    	const node = queue.pop();
+    	if (node !== nums[index++]) return false;
+
+    	for (const n of adjacencyList[node]) {
+    		if (--indegrees[n] === 0) queue.push(n);
+    	}
+    }
+
+    return index === nums.length;
+};
+
+var buildGraph = function(sequences, adjacencyList, indegrees) {
+	let numberOfVertices = 0;
+
+	for (let list of sequences) {
+		for (let i = 0; i < list.length; i++) {
+			const node = list[i];
+
+			if (adjacencyList[node] === undefined) {
+				adjacencyList[node] = [];
+				numberOfVertices++;
+			}
+
+			if (i + 1 < list.length) {
+				const next = list[i + 1];
+				adjacencyList[node].push(next);
+				indegrees[next]++;
+			}
+		}
+	}
+
+	return numberOfVertices;
+};
+```

@@ -1,0 +1,66 @@
+22. Generate Parentheses
+https://leetcode.com/problems/generate-parentheses/
+
+Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+
+Example 1:
+Input: n = 3
+Output: ["((()))","(()())","(())()","()(())","()()()"]
+
+Example 2:
+Input: n = 1
+Output: ["()"]
+
+Constraints:
+1 <= n <= 8
+
+** Solution **
+
+```C#
+public class Solution {
+    private const string LeftParenthesis = "(";
+    private const string RightParenthesis = ")";
+
+    public IList<string> GenerateParenthesis(int n)
+    {
+        var list = new List<string>();
+        GenerateParenthesisRecursively(n, n, list, string.Empty);
+
+        return list;
+    }
+
+    public void GenerateParenthesisRecursively(int openCount, int closeCount, IList<string> result, string current)
+    {
+        if (openCount == 0 && closeCount == 0) result.Add(current);
+
+        if (openCount > 0) GenerateParenthesisRecursively(openCount - 1, closeCount, result, current + LeftParenthesis);
+
+        if (closeCount > openCount) GenerateParenthesisRecursively(openCount, closeCount - 1, result, current + RightParenthesis);
+    }
+}
+```
+
+```JavaScript
+/**
+ * @param {number} n
+ * @return {string[]}
+ */
+var generateParenthesis = function(n) {
+    let list = [];
+
+    generateParenthesisRecursively(n, n, list, '');
+
+    return list;
+};
+
+var generateParenthesisRecursively = function(openCount, closeCount, list, str) {
+	if (openCount == 0 && closeCount == 0) {
+		list.push(str);
+		return;
+	}
+
+	if (openCount > 0) generateParenthesisRecursively(openCount - 1, closeCount, list, str + '(');
+
+	if (closeCount > openCount) generateParenthesisRecursively(openCount, closeCount - 1, list, str + ')');
+};
+```

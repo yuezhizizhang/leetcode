@@ -1,0 +1,170 @@
+729. My Calendar I
+https://leetcode.com/problems/my-calendar-i/
+
+You are implementing a program to use as your calendar. We can add a new event if adding the event will not cause a double booking.
+
+A double booking happens when two events have some non-empty intersection (i.e., some moment is common to both events.).
+
+The event can be represented as a pair of integers start and end that represents a booking on the half-open interval [start, end), the range of real numbers x such that start <= x < end.
+
+Implement the MyCalendar class:
+
+* MyCalendar() Initializes the calendar object.
+* boolean book(int start, int end) Returns true if the event can be added to the calendar successfully without causing a double booking. Otherwise, return false and do not add the event to the calendar.
+
+Example 1:
+
+Input
+["MyCalendar", "book", "book", "book"]
+[[], [10, 20], [15, 25], [20, 30]]
+Output
+[null, true, false, true]
+
+Explanation
+MyCalendar myCalendar = new MyCalendar();
+myCalendar.book(10, 20); // return True
+myCalendar.book(15, 25); // return False, It can not be booked because time 15 is already booked by another event.
+myCalendar.book(20, 30); // return True, The event can be booked, as the first event takes every time less than 20, but not including 20.
+
+Constraints:
+* 0 <= start < end <= 109
+* At most 1000 calls will be made to book.
+
+```C#
+public class MyCalendar {
+
+    private SortedList<int, int> Bookings { get; set; }
+
+    public MyCalendar()
+    {
+        this.Bookings = new SortedList<int, int>();
+    }
+
+    public bool Book(int start, int end)
+    {
+        var ends = this.Bookings.Keys;
+        var starts = this.Bookings.Values;
+        var size = ends.Count;
+
+        var pos = -1;
+        for (var i = 0; i < size; i++)
+        {
+            if (start < ends[i]) break;
+
+            pos = i;
+        }
+
+        if (size == 0 ||
+            pos < 0 && end <= starts[0] ||
+            pos == ends.Count - 1 ||
+            end <= starts[pos + 1])
+        {
+            this.Bookings.Add(end, start);
+            return true;
+        }
+
+        return false;
+    }
+}
+
+/**
+ * Your MyCalendar object will be instantiated and called as such:
+ * MyCalendar obj = new MyCalendar();
+ * bool param_1 = obj.Book(start,end);
+ */
+```
+
+```JavaScript
+var MyCalendar = function() {
+	this.bookings = null;
+};
+
+/** 
+ * @param {number} start 
+ * @param {number} end
+ * @return {boolean}
+ */
+MyCalendar.prototype.book = function(start, end) {
+	if (!this.bookings) {
+		this.bookings = new TreeNode(start, end);
+		return true;
+	}
+
+	return insert(this.bookings, start, end);
+};
+
+var insert = function(node, start, end) {
+	if (end <= node.start) {
+		if (!node.left) {
+			node.left = new TreeNode(start, end);
+			return true;
+		} else return insert(node.left, start, end);
+	} else if (start >= node.end) {
+		if (!node.right) {
+			node.right = new TreeNode(start, end);
+			return true;
+		} else return insert(node.right, start, end);
+	} else return false;
+}
+
+class TreeNode {
+	constructor(start, end) {
+		this.start = start;
+		this.end = end;
+		this.left = null;
+		this.right = null;
+	}
+};
+
+/** 
+ * Your MyCalendar object will be instantiated and called as such:
+ * var obj = new MyCalendar()
+ * var param_1 = obj.book(start,end)
+ */
+```
+
+```JavaScript
+/**
+ * Slow version.
+ */
+var MyCalendar = function() {
+    this.bookings = [];
+};
+
+/** 
+ * @param {number} start 
+ * @param {number} end
+ * @return {boolean}
+ */
+MyCalendar.prototype.book = function(start, end) {
+    const size = this.bookings.length;
+
+    let pos = -1;
+    for (let i = 0; i < size; i++) {
+    	if (start < this.bookings[i][1]) break;
+
+    	pos = i;
+    }
+
+    if (size === 0 ||
+    	pos < 0 && end <= this.bookings[0][0] ||
+    	pos === size - 1 ||
+    	end <= this.bookings[pos + 1][0]) {
+    	this.insert([start, end]);
+    	return true;
+    }
+
+    return false;
+};
+
+MyCalendar.prototype.insert = function(booking) {
+	this.bookings.push(booking);
+	this.bookings.sort((a, b) => a[1] - b[1]);
+};
+
+/** 
+ * Your MyCalendar object will be instantiated and called as such:
+ * var obj = new MyCalendar()
+ * var param_1 = obj.book(start,end)
+ */
+```
